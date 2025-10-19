@@ -1,15 +1,17 @@
+import { Router, Request, Response } from 'express';
 import path from 'path';
-import { Router, Request, Response } from "express";
-import authRouter from "./auth.route";
-import messageRouter from "./messages.route";
-const __dirname = path.resolve();
+import authRouter from './auth.route';
+import messageRouter from './messages.route';
+
 const router = Router();
+const ROOT = process.cwd(); 
 
-router.use('/auth', authRouter)
-router.use('/messages', messageRouter)
+router.use('/auth', authRouter);
+router.use('/messages', messageRouter);
 
-router.get('*', (req: Request, res: Response): void => {
-    res.sendFile(path.join(__dirname, '../frontend/dist/index.html'))
-})
+// keep LAST: SPA fallback
+router.get('*', (_req: Request, res: Response) => {
+  res.sendFile(path.resolve(ROOT, 'frontend/dist/index.html'));
+});
 
 export default router;

@@ -1,16 +1,11 @@
 import { Router, Request, Response } from 'express';
+import { signup } from '../controllers/auth.controller';
 
 const authRouter = Router();
 
-authRouter.get("/sign-in", (req: Request, res: Response): void => {
-  console.log("sign in");
-  res.send("Sign-in route hit"); // always send a response
-});
+authRouter.post("/sign-in", signup);
 
-authRouter.get("/sign-up", (req: Request, res: Response): void => {
-  console.log("sign in");
-  res.send("Sign-up route hit"); // always send a response
-});
+authRouter.post('/sign-up', signup);
 
 authRouter.get("/logout", (req: Request, res: Response): void => {
   console.log("sign in");
