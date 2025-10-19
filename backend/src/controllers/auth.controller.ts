@@ -45,14 +45,15 @@ export const signup = async (
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create new user
-    const newUser = await User.create({
+    const newUser = await new User({
       fullname,
       email,
       password: hashedPassword,
     });
 
-    // Generate JWT token
-    generateToken(newUser._id.toString(), res);
+    const savedUser = await newUser.save();
+    generateToken(savedUser._id.toString(), res);
+
 
     // Respond with new user info (excluding password)
     return res.status(201).json({
