@@ -100,6 +100,7 @@
     "range-parser": "^1.2.1",
     "raw-body": "^2.5.2",
     "readdirp": "^3.6.0",
+    "resend": "^6.0.2",
     "safe-buffer": "^5.2.1",
     "safer-buffer": "^2.1.2",
     "semver": "^7.7.3",

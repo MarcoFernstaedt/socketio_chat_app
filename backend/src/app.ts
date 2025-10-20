@@ -1,19 +1,17 @@
 import express from 'express';
-import dotenv from 'dotenv';
+import { ENV } from './lib/env';
 import path from 'path';
 import router from './routes';
 import connectDB from './lib/db';
 
-dotenv.config();
-
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = ENV.PORT || 3000;
 const ROOT = process.cwd(); // project root
 
 app.use(express.json());
 
 // static (prod)
-if (process.env.NODE_ENV === 'production') {
+if (ENV.NODE_ENV === 'production') {
   app.use(express.static(path.resolve(ROOT, 'frontend/dist')));
 }
 
