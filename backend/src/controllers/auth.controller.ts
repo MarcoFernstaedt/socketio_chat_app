@@ -6,6 +6,7 @@ import { sendWelcomeEmail } from "../emails/emailHandlers";
 import { ENV } from "../lib/env";
 
 type SignupRequestBody = { fullname: string; password: string; email: string };
+type LoginRequestBody = { email: string; password: string };
 
 export const signup = async (
   req: Request<{}, {}, SignupRequestBody>,
@@ -58,3 +59,44 @@ export const signup = async (
     return res.status(500).json({ message: "Internal server error" });
   }
 };
+
+export const login = async (
+  req: Request<{}, {}, LoginRequestBody>,
+  res: Response
+): Promise<Response> => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user)
+      return res.status(400).json({ message: "Invalid user credentials" });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid)
+      return res.status(400).json({ message: "Invalid user credentials" });
+
+    generateToken(user._id.toString(), res);
+
+    return res.status(200).json({
+      _id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      profilePic: user.profilePic,
+    });
+  } catch (err) {
+    console.error("Error in login controller: ", err);
+    res.status(500).json({ message: 'Internal server error'})
+  }
+
+  return res.status(200).json({ message: "Login successful" });
+};
+
+export const logout = (_req: Request, res: Response) => {
+  res.cookie('jwt', '', {
+  httpOnly: true,
+  sameSite: 'strict',
+  secure: process.env.NODE_ENV !== 'development',
+  expires: new Date(0),
+  maxAge: 0,
+});
+  return res.status(200).json({ message: "Logged out successfully"})
+}
