@@ -65,6 +65,8 @@ export const login = async (
   res: Response
 ): Promise<Response> => {
   const { email, password } = req.body;
+  if (!email || !password)
+    res.status(400).json({ message: "Email and password are required." });
 
   try {
     const user = await User.findOne({ email });
@@ -84,19 +86,19 @@ export const login = async (
     });
   } catch (err) {
     console.error("Error in login controller: ", err);
-    res.status(500).json({ message: 'Internal server error'})
+    res.status(500).json({ message: "Internal server error" });
   }
 
   return res.status(200).json({ message: "Login successful" });
 };
 
 export const logout = (_req: Request, res: Response) => {
-  res.cookie('jwt', '', {
-  httpOnly: true,
-  sameSite: 'strict',
-  secure: process.env.NODE_ENV !== 'development',
-  expires: new Date(0),
-  maxAge: 0,
-});
-  return res.status(200).json({ message: "Logged out successfully"})
-}
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: process.env.NODE_ENV !== "development",
+    expires: new Date(0),
+    maxAge: 0,
+  });
+  return res.status(200).json({ message: "Logged out successfully" });
+};
