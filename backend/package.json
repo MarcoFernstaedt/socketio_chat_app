@@ -19,6 +19,7 @@
     "call-bind-apply-helpers": "^1.0.2",
     "call-bound": "^1.0.4",
     "chokidar": "^3.6.0",
+    "cloudinary": "^2.5.1",
     "concat-map": "^0.0.1",
     "content-disposition": "^0.5.4",
     "content-type": "^1.0.5",
@@ -130,6 +131,7 @@
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.9",
     "@types/express": "^5.0.3",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.8.1",

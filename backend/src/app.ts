@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { ENV } from './lib/env';
 import path from 'path';
 import router from './routes';
@@ -9,6 +10,7 @@ const PORT = ENV.PORT || 3000;
 const ROOT = process.cwd(); // project root
 
 app.use(express.json());
+app.use(cookieParser())
 
 // static (prod)
 if (ENV.NODE_ENV === 'production') {

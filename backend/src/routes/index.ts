@@ -2,11 +2,13 @@ import { Router, Request, Response } from 'express';
 import path from 'path';
 import authRouter from './auth.route';
 import messageRouter from './messages.route';
+import userRouter from './user.route';
 
 const router = Router();
 const ROOT = process.cwd(); 
 
 router.use('/auth', authRouter);
+router.use('/users', userRouter)
 router.use('/messages', messageRouter);
 
 // keep LAST: SPA fallback
