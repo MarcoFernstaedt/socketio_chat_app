@@ -79,7 +79,7 @@ export const getAllChatPartners: RequestHandler = async (req, res) => {
 
 export const sendMessage: RequestHandler = async (req, res) => {
   try {
-    const { message, image, recipientId } = req.body;
+    const { message, image, receiverId } = req.body;
     const senderId = (req as ReqWithUser).user?._id;
 
     if (!senderId) {
@@ -90,6 +90,11 @@ export const sendMessage: RequestHandler = async (req, res) => {
       return res.status(400).json({ message: "Message or image is required." });
     }
 
+    if (senderId.equals(receiverId))
+      return res
+        .status(400)
+        .json({ message: "Cannot send messages to yourself." });
+
     let imageUrl: string | undefined;
     if (image) {
       const uploadResponse = await cloudinary.uploader.upload(image);
@@ -98,7 +103,7 @@ export const sendMessage: RequestHandler = async (req, res) => {
 
     const newMessage = await Message.create({
       senderId,
-      receiverId: recipientId,
+      receiverId,
       text: message,
       image: imageUrl,
     });
