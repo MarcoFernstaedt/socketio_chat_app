@@ -1,13 +1,13 @@
-import { Request, Response } from "express";
+import { Request, Response, RequestHandler } from "express";
 import User, { IUser } from "../models/User";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../lib/utils";
 import { sendWelcomeEmail } from "../emails/emailHandlers";
 import { ENV } from "../lib/env";
+import { ReqWithUser } from "../types/request";
 
 type SignupRequestBody = { fullname: string; password: string; email: string };
 type LoginRequestBody = { email: string; password: string };
-type ReqWIthUser = Express.Request & { user?: IUser }
 
 export const signup = async (
   req: Request<{}, {}, SignupRequestBody>,
@@ -104,11 +104,12 @@ export const logout = (_req: Request, res: Response) => {
   return res.status(200).json({ message: "Logged out successfully" });
 };
 
-export const isAuthorizedUser = (req: ReqWIthUser, res: Response)=> {
+export const isAuthorizedUser: RequestHandler = (req, res) => {
   try {
-    res.status(200).json(req.user);
+    const user = (req as ReqWithUser).user;
+    res.status(200).json(user);
   } catch (err) {
-    console.error('Error in isAuthorizedUser controller: ', err)
-    return res.status(500).json({ message: 'Internal server error.'})
+    console.error("Error in isAuthorizedUser controller: ", err);
+    return res.status(500).json({ message: "Internal server error." });
   }
-}
+};
