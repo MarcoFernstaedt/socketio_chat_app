@@ -1,24 +1,25 @@
-import { Request, Response } from "express";
+import { RequestHandler, Response } from "express";
 import cloudinary from "../lib/cloudinary";
 import User, { IUser } from "../models/User";
+import { ReqWithUser } from "../types/request";
 
 type UpdateBody = { profilePic: string };
-type ReqWithUser<B = unknown> = Request<{}, any, B> & { user?: IUser };
 
-export const updateUserProfilePic = async (
-  req: ReqWithUser<UpdateBody>,
-  res: Response
+export const updateUserProfilePic: RequestHandler = async (
+  req,
+  res
 ): Promise<Response> => {
   try {
-    const { profilePic } = req.body; // typed!
+    const { profilePic } = (req as ReqWithUser<UpdateBody>).body;
+    const user = (req as ReqWithUser).user;
     if (!profilePic)
       return res.status(400).json({ message: "Profile pic is required." });
-    if (!req.user) return res.status(401).json({ message: "Unauthorized" });
+    if (!user) return res.status(401).json({ message: "Unauthorized" });
 
     const upload = await cloudinary.uploader.upload(profilePic);
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.user._id.toString(),
+      user._id.toString(),
       { profilePic: upload.secure_url },
       { new: true, select: "-password" }
     );

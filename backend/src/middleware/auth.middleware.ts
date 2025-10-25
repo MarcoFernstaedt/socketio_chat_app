@@ -1,15 +1,15 @@
-import { NextFunction, Request, Response } from "express";
+import { RequestHandler } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import User, { IUser } from "../models/User";
+import User from "../models/User";
 import { ENV } from "../lib/env";
+import { ReqWithUser } from "../types/request";
 
 type TokenPayload = JwtPayload & { userId: string };
-type ReqWithUser = Request & { user?: IUser }
 
-export const authorizationMiddleware = async (
-  req: ReqWithUser,
-  res: Response,
-  next: NextFunction
+const authorizationMiddleware: RequestHandler = async (
+  req,
+  res,
+  next
 ) => {
   try {
     const token = req.cookies?.jwt;
@@ -23,10 +23,12 @@ export const authorizationMiddleware = async (
     const user = await User.findById(decoded.userId).select("-password");
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    req.user = user;
+    (req as ReqWithUser).user = user; // cast here
     return next();
   } catch (err) {
-    console.error("Authorization middleware: ", err)
-    return res.status(401).json({ message: "Internal server error" });
+    console.error("Authorization middleware:", err);
+    return res.status(401).json({ message: "Unauthorized" });
   }
 };
+
+export default authorizationMiddleware;
