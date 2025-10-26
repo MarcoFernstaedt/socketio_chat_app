@@ -1,116 +1,112 @@
 import { RequestHandler } from "express";
+import { Types, isValidObjectId } from "mongoose";
 import User from "../models/User";
-import { ReqWithUser } from "../types/request";
-import { Types } from "mongoose";
 import Message from "../models/message";
 import cloudinary from "../lib/cloudinary";
+import { AppError } from "../lib/AppError";
 
+/**
+ * GET /message/contacts
+ * Return all users except the authenticated user
+ */
 export const getAllContacts: RequestHandler = async (req, res) => {
-  try {
-    const user = (req as ReqWithUser).user;
-    const userId = new Types.ObjectId(user._id.toString());
+  if (!req.auth) throw new AppError("Unauthorized", 401);
 
-    const filteredUsers = await User.find({ _id: { $ne: userId } }).select(
-      "-password"
-    );
+  const contacts = await User.find({ _id: { $ne: req.auth.userId } })
+    .select("fullname email profilePic")
+    .lean();
 
-    return res.status(200).json(filteredUsers);
-  } catch (err) {
-    console.error("Error in getAllContacts:", err);
-    return res.status(500).json({ message: "Internal server error." });
-  }
+  return res.status(200).json(contacts);
 };
 
+/**
+ * GET /message/:id
+ * Return all messages between me and :id
+ */
 export const getMessagesWithUser: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req as ReqWithUser).user._id.toString();
-    const { id: recipiantId } = req.params;
+  if (!req.auth) throw new AppError("Unauthorized", 401);
 
-    const messages = Message.find({
-      $or: [
-        { senderId: userId, receiverId: recipiantId },
-        { senderId: recipiantId, receiverId: userId },
-      ],
-    });
+  const { id: recipientId } = req.params;
+  if (!isValidObjectId(recipientId)) throw new AppError("Invalid user id", 400);
 
-    return res.status(200).json(messages);
-  } catch (err) {
-    console.error("Error in getMessagesWithUser:", err);
-    return res.status(500).json({ message: "Internal server error." });
-  }
+  const myId = new Types.ObjectId(req.auth.userId);
+  const otherId = new Types.ObjectId(recipientId);
+
+  const messages = await Message.find({
+    $or: [
+      { senderId: myId, receiverId: otherId },
+      { senderId: otherId, receiverId: myId },
+    ],
+  })
+    .sort({ createdAt: 1 })
+    .lean();
+
+  return res.status(200).json(messages);
 };
 
+/**
+ * GET /message/chats
+ * Return unique chat partners for the authenticated user
+ */
 export const getAllChatPartners: RequestHandler = async (req, res) => {
-  try {
-    const userId = (req as ReqWithUser).user?._id;
-    if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  if (!req.auth) throw new AppError("Unauthorized", 401);
 
-    // Find all messages involving the logged-in user
-    const messages = await Message.find({
-      $or: [{ senderId: userId }, { receiverId: userId }],
-    });
+  const myId = new Types.ObjectId(req.auth.userId);
 
-    const chatPartnerIds = [
-      ...new Set(
-        messages.map((msg) =>
-          msg.senderId.toString() === userId.toString()
-            ? msg.receiverId.toString()
-            : msg.senderId.toString()
-        )
-      ),
-    ];
+  const messages = await Message.find({
+    $or: [{ senderId: myId }, { receiverId: myId }],
+  }).select("senderId receiverId");
 
-    if (chatPartnerIds.length === 0) {
-      return res.status(200).json([]);
-    }
-
-    const chatPartners = await User.find({
-      _id: { $in: chatPartnerIds },
-    }).select("-password");
-
-    return res.status(200).json(chatPartners);
-  } catch (err) {
-    console.error("Error in getAllChats:", err);
-    return res.status(500).json({ message: "Internal server error." });
+  const partnerIds = new Set<string>();
+  for (const m of messages) {
+    const s = m.senderId.toString();
+    const r = m.receiverId.toString();
+    if (s !== myId.toString()) partnerIds.add(s);
+    if (r !== myId.toString()) partnerIds.add(r);
   }
+  if (partnerIds.size === 0) return res.status(200).json([]);
+
+  const partners = await User.find({ _id: { $in: [...partnerIds] } })
+    .select("fullname email profilePic")
+    .lean();
+
+  return res.status(200).json(partners);
 };
 
+/**
+ * POST /message/send/:id
+ * Body: { message?: string; image?: string; receiverId: string }
+ */
 export const sendMessage: RequestHandler = async (req, res) => {
-  try {
-    const { message, image, receiverId } = req.body;
-    const senderId = (req as ReqWithUser).user?._id;
+  if (!req.auth) throw new AppError("Unauthorized", 401);
 
-    if (!senderId) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+  const { message, image, receiverId } = req.body as {
+    message?: string;
+    image?: string;
+    receiverId: string;
+  };
 
-    if (!message && !image) {
-      return res.status(400).json({ message: "Message or image is required." });
-    }
+  if (!receiverId || !isValidObjectId(receiverId))
+    throw new AppError("Invalid receiverId", 400);
 
-    if (senderId.equals(receiverId))
-      return res
-        .status(400)
-        .json({ message: "Cannot send messages to yourself." });
+  if (!message && !image)
+    throw new AppError("Message or image is required", 400);
 
-    let imageUrl: string | undefined;
-    if (image) {
-      const uploadResponse = await cloudinary.uploader.upload(image);
-      imageUrl = uploadResponse.secure_url;
-    }
+  if (req.auth.userId === receiverId)
+    throw new AppError("Cannot send messages to yourself", 400);
 
-    const newMessage = await Message.create({
-      senderId,
-      receiverId,
-      text: message,
-      image: imageUrl,
-    });
-
-    return res.status(201).json(newMessage);
-  } catch (err) {
-    console.error("Error in sendMessage:", err);
-    return res.status(500).json({ message: "Internal server error." });
+  let imageUrl: string | undefined;
+  if (image) {
+    const upload = await cloudinary.uploader.upload(image);
+    imageUrl = upload.secure_url;
   }
+
+  const newMessage = await Message.create({
+    senderId: new Types.ObjectId(req.auth.userId),
+    receiverId: new Types.ObjectId(receiverId),
+    text: message,
+    image: imageUrl,
+  });
+
+  return res.status(201).json(newMessage);
 };
