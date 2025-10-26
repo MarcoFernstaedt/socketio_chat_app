@@ -11,8 +11,6 @@ import { asyncHandler } from "../lib/asyncHandler";
 
 const authRouter = Router();
 
-// authRouter.use(arcjet);
-
 authRouter.post("/sign-in", login);
 authRouter.post("/sign-up", signup);
 authRouter.post("/logout", logout);
