@@ -4,6 +4,7 @@ import { ENV } from './lib/env';
 import path from 'path';
 import router from './routes';
 import connectDB from './lib/db';
+import { errorHandler } from './middleware/error';
 
 const app = express();
 const PORT = ENV.PORT || 3000;
@@ -11,6 +12,7 @@ const ROOT = process.cwd(); // project root
 
 app.use(express.json());
 app.use(cookieParser())
+app.use(errorHandler)
 
 // static (prod)
 if (ENV.NODE_ENV === 'production') {

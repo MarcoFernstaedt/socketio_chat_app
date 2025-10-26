@@ -1,11 +1,9 @@
 import { Router, Request, Response } from 'express'
 import { getAllChatPartners, getAllContacts, getMessagesWithUser, sendMessage } from '../controllers/messages.controller';
 import authorizationMiddleware from '../middleware/auth.middleware';
-import arcjetProtection from '../middleware/arcjet.middleware';
 
 const messageRouter = Router();
 
-messageRouter.use(arcjetProtection);
 messageRouter.use(authorizationMiddleware)
 
 messageRouter.get('/contacts', getAllContacts);

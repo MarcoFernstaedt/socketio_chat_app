@@ -5,8 +5,6 @@ import arcjetProtection from "../middleware/arcjet.middleware";
 
 const userRouter = Router();
 
-userRouter.use(arcjetProtection);
-
 userRouter.patch("/me", authorizationMiddleware, updateUserProfilePic);
 
 export default userRouter;
