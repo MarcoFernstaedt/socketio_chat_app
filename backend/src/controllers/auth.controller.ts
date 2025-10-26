@@ -1,115 +1,90 @@
-import { Request, Response, RequestHandler } from "express";
-import User, { IUser } from "../models/User";
+import { RequestHandler } from "express";
 import bcrypt from "bcryptjs";
+import User from "../models/User";
 import { generateToken } from "../lib/utils";
 import { sendWelcomeEmail } from "../emails/emailHandlers";
 import { ENV } from "../lib/env";
-import { ReqWithUser } from "../types/request";
+import { AppError } from "../lib/AppError";
+import { toSafeUser } from "../lib/serializers/user";
 
-type SignupRequestBody = { fullname: string; password: string; email: string };
-type LoginRequestBody = { email: string; password: string };
+/**
+ * @desc Register a new user
+ * @route POST /auth/sign-up
+ */
+export const signup: RequestHandler = async (req, res) => {
+  const { fullname, email, password } = req.body;
 
-export const signup = async (
-  req: Request<{}, {}, SignupRequestBody>,
-  res: Response
-): Promise<Response> => {
-  try {
-    const { fullname, password, email } = req.body;
+  if (!fullname || !email || !password)
+    throw new AppError("All fields are required.", 400);
+  if (password.length < 6)
+    throw new AppError("Password must be at least 6 characters.", 400);
 
-    if (!fullname || !password || !email)
-      return res.status(400).json({ message: "All fields are required" });
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) throw new AppError("Invalid email format.", 400);
 
-    if (password.length < 6)
-      return res
-        .status(400)
-        .json({ message: "Password must be at least 6 characters" });
+  const existingUser = await User.findOne({ email });
+  if (existingUser)
+    throw new AppError("User already exists. Please log in.", 409);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email))
-      return res.status(400).json({ message: "Invalid email format" });
+  const hashedPassword = await bcrypt.hash(password, await bcrypt.genSalt(10));
+  const newUser = await User.create({ fullname, email, password: hashedPassword });
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser)
-      return res
-        .status(409)
-        .json({ message: "User already exists. Please log in." });
+  generateToken(newUser._id.toString(), res);
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      await bcrypt.genSalt(10)
-    );
-    const newUser = new User({ fullname, email, password: hashedPassword });
-    const savedUser = await newUser.save();
+  // send welcome email asynchronously
+  void sendWelcomeEmail(
+    newUser.email,
+    newUser.fullname,
+    ENV.CLIENT_URL as string
+  ).catch((err) => console.error("Failed to send welcome email:", err));
 
-    generateToken(savedUser._id.toString(), res);
-
-    void sendWelcomeEmail(
-      savedUser.email,
-      savedUser.fullname,
-      ENV.CLIENT_URL as string
-    ).catch((err) => console.error("Failed to send welcome emails.", err));
-
-    return res.status(201).json({
-      _id: savedUser._id,
-      fullname: savedUser.fullname,
-      email: savedUser.email,
-      profilePic: savedUser.profilePic,
-    });
-  } catch (err) {
-    console.error("Error in signup controller:", err);
-    return res.status(500).json({ message: "Internal server error" });
-  }
+  return res.status(201).json(toSafeUser(newUser));
 };
 
-export const login = async (
-  req: Request<{}, {}, LoginRequestBody>,
-  res: Response
-): Promise<Response> => {
+/**
+ * @desc Log in user
+ * @route POST /auth/sign-in
+ */
+export const login: RequestHandler = async (req, res) => {
   const { email, password } = req.body;
+
   if (!email || !password)
-    res.status(400).json({ message: "Email and password are required." });
+    throw new AppError("Email and password are required.", 400);
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user)
-      return res.status(400).json({ message: "Invalid user credentials" });
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid)
-      return res.status(400).json({ message: "Invalid user credentials" });
+  const user = await User.findOne({ email });
+  if (!user) throw new AppError("Invalid email or password.", 400);
 
-    generateToken(user._id.toString(), res);
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) throw new AppError("Invalid email or password.", 400);
 
-    return res.status(200).json({
-      _id: user._id,
-      fullname: user.fullname,
-      email: user.email,
-      profilePic: user.profilePic,
-    });
-  } catch (err) {
-    console.error("Error in login controller: ", err);
-    res.status(500).json({ message: "Internal server error" });
-  }
-
-  return res.status(200).json({ message: "Login successful" });
+  generateToken(user._id.toString(), res);
+  return res.status(200).json(toSafeUser(user));
 };
 
-export const logout = (_req: Request, res: Response) => {
+/**
+ * @desc Log out user (clear JWT cookie)
+ * @route POST /auth/logout
+ */
+export const logout: RequestHandler = (_req, res) => {
   res.cookie("jwt", "", {
     httpOnly: true,
     sameSite: "strict",
-    secure: process.env.NODE_ENV !== "development",
+    secure: ENV.NODE_ENV !== "development",
     expires: new Date(0),
-    maxAge: 0,
   });
-  return res.status(200).json({ message: "Logged out successfully" });
+  return res.status(200).json({ message: "Logged out successfully." });
 };
 
-export const isAuthorizedUser: RequestHandler = (req, res) => {
-  try {
-    const user = (req as ReqWithUser).user;
-    res.status(200).json(user);
-  } catch (err) {
-    console.error("Error in isAuthorizedUser controller: ", err);
-    return res.status(500).json({ message: "Internal server error." });
-  }
+/**
+ * @desc Return authorized user info
+ * @route GET /auth/me
+ * @access Private
+ */
+export const isAuthorizedUser: RequestHandler = async (req, res) => {
+  if (!req.auth) throw new AppError("Unauthorized", 401);
+
+  const user = await User.findById(req.auth.userId).select("-password");
+  if (!user) throw new AppError("User not found.", 404);
+
+  return res.status(200).json(toSafeUser(user));
 };
