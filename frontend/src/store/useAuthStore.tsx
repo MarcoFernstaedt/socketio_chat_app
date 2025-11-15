@@ -1,23 +1,30 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-import { getErrorMessage } from "../utils/error";
+import { getErrorMessage } from "../lib/error";
 
-type AuthUser = {
-    id: string;
-    fullname: string;
+export type AuthUser = {
+    _id: string;           // matches your backend _id
     email: string;
+    fullname: string;
+    profilePic?: string;   // optional in backend
+    // createdAt?: string;
+    // updatedAt?: string;
 };
 
-type SignupCredentials = {
+export type SignupCredentials = {
     fullname: string;
     email: string;
     password: string;
 };
 
-type LoginCredentials = {
+export type LoginCredentials = {
     email: string;
     password: string;
+};
+
+export type UpdateProfilePayload = {
+    profilePic: string;
 };
 
 type AuthStore = {
@@ -30,6 +37,7 @@ type AuthStore = {
     signup: (credentials: SignupCredentials) => Promise<void>;
     login: (credentials: LoginCredentials) => Promise<void>;
     logout: () => Promise<void>;
+    updateProfile: (payload: UpdateProfilePayload) => Promise<void>;
 };
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -112,6 +120,19 @@ export const useAuthStore = create<AuthStore>((set) => ({
             );
             toast.error(message);
             console.error("Error logging out:", err);
+        }
+    },
+
+    // Update logged-in user's profile (e.g., profilePic)
+    updateProfile: async (payload) => {
+        try {
+            const res = await axiosInstance.put<AuthUser>("/users/me", payload);
+            set({ authUser: res.data });
+            toast.success("Profile updated successfully");
+        } catch (err) {
+            const message = getErrorMessage(err, "Error updating profile.");
+            toast.error(message);
+            console.error("Error updating profile:", err);
         }
     },
 }));
