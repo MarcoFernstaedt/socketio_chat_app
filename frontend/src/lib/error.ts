@@ -1,4 +1,3 @@
-// src/utils/error.ts
 export type ErrorWithResponse = {
   response?: {
     data?: {

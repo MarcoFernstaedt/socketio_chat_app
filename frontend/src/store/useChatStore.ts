@@ -3,21 +3,36 @@ import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { getErrorMessage } from "../lib/error";
 
-type ChatTab = "chats" | "contacts";
+export type ChatTab = "chats" | "contacts";
+
+export type ChatUser = {
+  _id: string;
+  fullname: string;
+  email: string;
+  profilePic?: string;
+};
+
+export type ChatMessage = {
+  _id: string;
+  senderId: string;
+  receiverId: string;
+  content: string;
+  createdAt: string;
+};
 
 type ChatStore = {
-  allContacts: unknown[];
-  chats: unknown[];
-  messages: unknown[];
+  allContacts: ChatUser[];
+  chats: ChatUser[];
+  messages: ChatMessage[];
   activeTab: ChatTab;
-  selectedUser: unknown | null;
+  selectedUser: ChatUser | null;
   isUsersLoading: boolean;
   isMessagesLoading: boolean;
   isSoundEnabled: boolean;
 
   toggleSound: () => void;
   setActiveTab: (tab: ChatTab) => void;
-  setSelectedUser: (user: unknown | null) => void;
+  setSelectedUser: (user: ChatUser | null) => void;
   getAllContacts: () => Promise<void>;
   getChatPartners: () => Promise<void>;
 };
@@ -28,7 +43,7 @@ const getInitialSoundEnabled = (): boolean => {
   return value ? value === "true" : true;
 };
 
-export const useChatStore = create<ChatStore>((set, get) => ({
+export const useChatStore = create<ChatStore>((set) => ({
   allContacts: [],
   chats: [],
   messages: [],
@@ -54,7 +69,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isUsersLoading: true });
 
     try {
-      const res = await axiosInstance.get("/messages/contacts");
+      const res = await axiosInstance.get<ChatUser[]>("/messages/contacts");
       set({ allContacts: res.data });
     } catch (err) {
       const message = getErrorMessage(err, "Error getting all contacts");
@@ -69,8 +84,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     set({ isUsersLoading: true });
 
     try {
-      // adjust endpoint if you have a different one for chat partners
-      const res = await axiosInstance.get("/messages/contacts");
+      const res = await axiosInstance.get<ChatUser[]>("/messages/chats");
       set({ chats: res.data });
     } catch (err) {
       const message = getErrorMessage(err, "Error getting chat partners");
