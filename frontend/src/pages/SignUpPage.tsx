@@ -1,4 +1,4 @@
-import React, { useState, type ChangeEvent, type FormEvent } from "react";
+import React, { type FormEvent } from "react";
 import { Link } from "react-router";
 import {
     MessageCircleIcon,
@@ -8,6 +8,7 @@ import {
     LoaderIcon,
 } from "lucide-react";
 
+import { useForm } from "../hooks/useForm.ts";
 import { useAuthStore } from "../store/useAuthStore";
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 
@@ -18,22 +19,13 @@ type SignupFormData = {
 };
 
 const SignUpPage: React.FC = () => {
-    const [formData, setFormData] = useState<SignupFormData>({
+    const { formData, handleChange } = useForm<SignupFormData>({
         fullname: "",
         email: "",
         password: "",
     });
 
     const { signup, isSigningUp } = useAuthStore();
-
-    const handleChange = (event: ChangeEvent<HTMLInputElement>): void => {
-        const { name, value } = event.target;
-
-        setFormData((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
 
     const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
         event.preventDefault();

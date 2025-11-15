@@ -1,9 +1,154 @@
-import React from 'react'
+import React, { type FormEvent } from "react";
+import { Link } from "react-router";
+import {
+    MessageCircleIcon,
+    LockIcon,
+    MailIcon,
+    LoaderIcon,
+} from "lucide-react";
 
-const LoginPage = () => {
+import { useForm } from "../hooks/useForm";
+import { useAuthStore } from "../store/useAuthStore";
+import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
+
+type LoginFormData = {
+    email: string;
+    password: string;
+};
+
+const LoginPage: React.FC = () => {
+    const { formData, handleChange } = useForm<LoginFormData>({
+        email: "",
+        password: "",
+    });
+
+    const { login, isLoggingIn } = useAuthStore();
+
+    const handleSubmit = (event: FormEvent<HTMLFormElement>): void => {
+        event.preventDefault();
+        login(formData);
+    };
+
     return (
-        <div>LoginPage</div>
-    )
-}
+        <div className="flex w-full items-center justify-center bg-slate-900 p-4">
+            <div className="relative h-[650px] w-full max-w-6xl md:h-[800px]">
+                <BorderAnimatedContainer>
+                    <div className="flex w-full flex-col md:flex-row">
+                        {/* FORM COLUMN - LEFT SIDE */}
+                        <div className="flex items-center justify-center p-8 md:w-1/2 md:border-r border-slate-600/30">
+                            <div className="w-full max-w-md">
+                                {/* HEADING TEXT */}
+                                <div className="mb-8 text-center">
+                                    <MessageCircleIcon className="mb-4 h-12 w-12 mx-auto text-slate-400" />
+                                    <h2 className="mb-2 text-2xl font-bold text-slate-200">
+                                        Welcome back
+                                    </h2>
+                                    <p className="text-slate-400">
+                                        Login to access your account
+                                    </p>
+                                </div>
 
-export default LoginPage
+                                {/* FORM */}
+                                <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+                                    {/* EMAIL INPUT */}
+                                    <div>
+                                        <label
+                                            htmlFor="email"
+                                            className="auth-input-label"
+                                        >
+                                            Email
+                                        </label>
+                                        <div className="relative">
+                                            <MailIcon className="auth-input-icon" />
+
+                                            <input
+                                                id="email"
+                                                name="email"
+                                                type="email"
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                className="input"
+                                                placeholder="johndoe@gmail.com"
+                                                autoComplete="email"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* PASSWORD INPUT */}
+                                    <div>
+                                        <label
+                                            htmlFor="password"
+                                            className="auth-input-label"
+                                        >
+                                            Password
+                                        </label>
+                                        <div className="relative">
+                                            <LockIcon className="auth-input-icon" />
+
+                                            <input
+                                                id="password"
+                                                name="password"
+                                                type="password"
+                                                value={formData.password}
+                                                onChange={handleChange}
+                                                className="input"
+                                                placeholder="Enter your password"
+                                                autoComplete="current-password"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* SUBMIT BUTTON */}
+                                    <button
+                                        className="auth-btn"
+                                        type="submit"
+                                        disabled={isLoggingIn}
+                                    >
+                                        {isLoggingIn ? (
+                                            <LoaderIcon className="h-5 w-full animate-spin text-center" />
+                                        ) : (
+                                            "Sign In"
+                                        )}
+                                    </button>
+                                </form>
+
+                                <div className="mt-6 text-center">
+                                    <Link to="/signup" className="auth-link">
+                                        Don't have an account? Sign Up
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* FORM ILLUSTRATION - RIGHT SIDE */}
+                        <div className="hidden items-center justify-center bg-gradient-to-bl from-slate-800/20 to-transparent p-6 md:flex md:w-1/2">
+                            <div>
+                                <img
+                                    src="/login.png"
+                                    alt="People using mobile devices"
+                                    className="h-auto w-full object-contain"
+                                    loading="lazy"
+                                />
+                                <div className="mt-6 text-center">
+                                    <h3 className="text-xl font-medium text-cyan-400">
+                                        Connect anytime, anywhere
+                                    </h3>
+
+                                    <div className="mt-4 flex justify-center gap-4">
+                                        <span className="auth-badge">Free</span>
+                                        <span className="auth-badge">Easy Setup</span>
+                                        <span className="auth-badge">Private</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </BorderAnimatedContainer>
+            </div>
+        </div>
+    );
+};
+
+export default LoginPage;
