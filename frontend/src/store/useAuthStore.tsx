@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
+import { getErrorMessage } from "../utils/error";
 
 type AuthUser = {
     id: string;
@@ -19,14 +20,6 @@ type LoginCredentials = {
     password: string;
 };
 
-type ErrorWithResponse = {
-    response?: {
-        data?: {
-            message?: string;
-        };
-    };
-};
-
 type AuthStore = {
     authUser: AuthUser | null;
     isCheckingAuth: boolean;
@@ -37,11 +30,6 @@ type AuthStore = {
     signup: (credentials: SignupCredentials) => Promise<void>;
     login: (credentials: LoginCredentials) => Promise<void>;
     logout: () => Promise<void>;
-};
-
-const getErrorMessage = (error: unknown, fallback: string): string => {
-    const err = error as ErrorWithResponse;
-    return err?.response?.data?.message ?? fallback;
 };
 
 export const useAuthStore = create<AuthStore>((set) => ({
