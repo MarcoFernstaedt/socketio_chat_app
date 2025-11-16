@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useChatStore } from "../store/useChatStore";
 import { useAuthStore } from "../store/useAuthStore";
 import ChatHeader from "./ChatHeader";
@@ -8,21 +8,39 @@ import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
 
 const ChatContainer: React.FC = () => {
     const { authUser } = useAuthStore();
-    const { isMessagesLoading, selectedUser, getMessagesByUserId, messages } =
-        useChatStore();
+    const {
+        isMessagesLoading,
+        selectedUser,
+        getMessagesByUserId,
+        messages,
+    } = useChatStore();
 
+    const messageEndRef = useRef<HTMLDivElement | null>(null);
+
+    // Load messages whenever the selected user changes
     useEffect(() => {
         if (!selectedUser) return;
         void getMessagesByUserId(selectedUser._id);
     }, [getMessagesByUserId, selectedUser]);
 
+    // Auto-scroll to bottom when messages update
+    useEffect(() => {
+        messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+
+    const noChatSelected = !selectedUser;
+    const hasMessages = messages.length > 0;
+
     return (
         <>
             <ChatHeader />
+
             <div className="flex-1 overflow-y-auto px-6 py-8">
-                {isMessagesLoading ? (
-                    <MessagesLoadingSkeleton />
-                ) : messages.length > 0 && selectedUser ? (
+                {/* LOADING */}
+                {isMessagesLoading && <MessagesLoadingSkeleton />}
+
+                {/* CHAT HISTORY */}
+                {!isMessagesLoading && hasMessages && selectedUser && (
                     <div className="mx-auto max-w-3xl space-y-6">
                         {messages.map((msg) => {
                             const isOwnMessage =
@@ -35,36 +53,46 @@ const ChatContainer: React.FC = () => {
                                 >
                                     <div
                                         className={`chat-bubble relative ${isOwnMessage
-                                                ? "bg-cyan-600 text-black"
-                                                : "bg-slate-800 text-slate-200"
+                                            ? "bg-cyan-600 text-black"
+                                            : "bg-slate-800 text-slate-200"
                                             }`}
                                     >
-                                        {"image" in msg && msg.image ? (
+                                        {msg.image && (
                                             <img
                                                 src={msg.image}
                                                 alt="message attachment"
                                                 className="h-48 rounded-lg object-cover"
                                             />
-                                        ) : null}
+                                        )}
 
-                                        {"text" in msg && msg.text ? (
-                                            <p className="mt-2">{msg.text}</p>
-                                        ) : null}
+                                        {msg.text && <p className="mt-2">{msg.text}</p>}
 
                                         <p className="mt-1 flex items-center gap-1 text-xs opacity-75">
-                                            {new Date(msg.createdAt).toISOString().slice(11, 16)}
+                                            {new Date(msg.createdAt).toLocaleTimeString(undefined, {
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                            })}
                                         </p>
                                     </div>
                                 </div>
                             );
                         })}
+
+                        <div ref={messageEndRef} />
                     </div>
-                ) : isMessagesLoading ? (
-                    <MessagesLoadingSkeleton />
-                ) : (
-                    <NoChatHistoryPlaceholder name={selectedUser?.fullname} />
+                )}
+
+                {/* EMPTY CHAT OR NO USER SELECTED */}
+                {!isMessagesLoading && !hasMessages && selectedUser && (
+                    <NoChatHistoryPlaceholder name={selectedUser.fullname} />
+                )}
+
+                {/* NO USER SELECTED */}
+                {noChatSelected && !isMessagesLoading && (
+                    <p className="text-center text-slate-400">Select a user to start chatting.</p>
                 )}
             </div>
+
             <MessageInput />
         </>
     );
