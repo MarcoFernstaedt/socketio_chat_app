@@ -9,7 +9,7 @@ import ContactsList from '../components/ContactsList';
 import ChatContainer from '../components/ChatContainer';
 import NoConversationPlaceholder from '../components/NoConversationPlaceholder';
 
-const ChatPage = () => {
+const ChatPage: React.FC = () => {
     const { activeTab, selectedUser } = useChatStore()
     return (
         <div className='relative w-full max-w-6xl h-[800px]'>
