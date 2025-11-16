@@ -16,8 +16,9 @@ export type ChatMessage = {
   _id: string;
   senderId: string;
   receiverId: string;
-  content: string;
-  createdAt: string;
+  image?: string;
+  text?: string;
+  createdAt: Date;
 };
 
 type ChatStore = {
@@ -35,6 +36,7 @@ type ChatStore = {
   setSelectedUser: (user: ChatUser | null) => void;
   getAllContacts: () => Promise<void>;
   getChatPartners: () => Promise<void>;
+  getMessagesByUserId: (userId: string) => Promise<void>;
 };
 
 const getInitialSoundEnabled = (): boolean => {
@@ -92,6 +94,24 @@ export const useChatStore = create<ChatStore>((set) => ({
       console.error("Error in getChatPartners:", err);
     } finally {
       set({ isUsersLoading: false });
+    }
+  },
+
+  getMessagesByUserId: async (userId) => {
+    set({ isMessagesLoading: true });
+
+    try {
+      // adjust the endpoint if your backend uses a different path
+      const res = await axiosInstance.get<ChatMessage[]>(
+        `/messages/${userId}`
+      );
+      set({ messages: res.data });
+    } catch (err) {
+      const message = getErrorMessage(err, "Error getting messages with user");
+      toast.error(message);
+      console.error("Error getting messages with user:", err);
+    } finally {
+      set({ isMessagesLoading: false });
     }
   },
 }));

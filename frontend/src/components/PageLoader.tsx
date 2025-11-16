@@ -1,12 +1,12 @@
-import { LoaderIcon } from 'lucide-react'
-import React from 'react'
+import React from "react";
+import { LoaderIcon } from "lucide-react";
 
-const PageLoader = () => {
+const PageLoader: React.FC = () => {
     return (
-        <div className='flex items-center justify-center h-screen'>
-            <LoaderIcon className='size-10 animate-spin' />
+        <div className="flex h-screen items-center justify-center">
+            <LoaderIcon className="size-10 animate-spin text-cyan-400" />
         </div>
-    )
-}
+    );
+};
 
-export default PageLoader
+export default PageLoader;
