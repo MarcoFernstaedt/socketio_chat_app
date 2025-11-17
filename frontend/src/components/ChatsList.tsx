@@ -11,7 +11,9 @@ const ChatsList: React.FC = () => {
         chats,
         isUsersLoading,
         setSelectedUser,
+        selectedUser,
     } = useChatStore();
+    const isOnline = Boolean(selectedUser && onlineUsers.includes(selectedUser._id));
 
     useEffect(() => {
         void getChatPartners();
@@ -29,7 +31,7 @@ const ChatsList: React.FC = () => {
                     onClick={() => setSelectedUser(chat)}
                 >
                     <div className="flex items-center gap-3">
-                        <div className={`avatar ${onlineUsers.includes(chat._id ? 'online' : 'offline')}`}>
+                        <div className={`avatar ${isOnline ? 'online' : 'offline'}`}>
                             <div className="size-12 rounded-full overflow-hidden">
                                 <img
                                     src={chat.profilePic || "/avatar.png"}
