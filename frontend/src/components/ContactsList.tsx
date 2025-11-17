@@ -12,13 +12,15 @@ const ContactsList: React.FC = () => {
         isUsersLoading,
         selectedUser,
     } = useChatStore();
-    const isOnline = Boolean(selectedUser && onlineUsers.includes(selectedUser._id));
+    const isOnline = Boolean(
+        selectedUser && onlineUsers.includes(selectedUser._id)
+    );
 
     useEffect(() => {
         void getAllContacts();
     }, [getAllContacts]);
 
-    if (isUsersLoading) <UsersLoadingSkeleton />
+    if (isUsersLoading) <UsersLoadingSkeleton />;
 
     return (
         <>
@@ -29,7 +31,10 @@ const ContactsList: React.FC = () => {
                     onClick={() => setSelectedUser(contact)}
                 >
                     <div className="flex items-center gap-3">
-                        <div className={`avatar ${isOnline ? 'online' : 'offline'}`}>
+                        <div
+                            className={`avatar ${onlineUsers.includes(contact._id) ? "online" : "offline"
+                                }`}
+                        >
                             <div className="size-12 overflow-hidden rounded-full">
                                 <img
                                     src={contact.profilePic || "/avatar.png"}
