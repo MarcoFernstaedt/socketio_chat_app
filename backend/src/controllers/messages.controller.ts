@@ -4,6 +4,7 @@ import User from "../models/User";
 import Message from "../models/message";
 import cloudinary from "../lib/cloudinary";
 import { AppError } from "../lib/AppError";
+import { getReceiverSocketId, ioInstance } from "../lib/socket";
 
 /**
  * GET /message/contacts
@@ -27,7 +28,10 @@ export const getMessagesWithUser: RequestHandler = async (req, res) => {
   if (!req.auth) throw new AppError("Unauthorized", 401);
 
   const { id: recipientId } = req.params;
-  if (!isValidObjectId(recipientId)) throw new AppError("Invalid user id", 400);
+
+  if (!recipientId || !isValidObjectId(recipientId)) {
+    throw new AppError("Invalid user id", 400);
+  }
 
   const myId = new Types.ObjectId(req.auth.userId);
   const otherId = new Types.ObjectId(recipientId);
@@ -67,7 +71,9 @@ export const getAllChatPartners: RequestHandler = async (req, res) => {
     if (r !== myIdStr) partnerIds.add(r);
   }
 
-  if (partnerIds.size === 0) return res.status(200).json([]);
+  if (partnerIds.size === 0) {
+    return res.status(200).json([]);
+  }
 
   const partners = await User.find({ _id: { $in: [...partnerIds] } })
     .select("fullname email profilePic")
@@ -118,6 +124,12 @@ export const sendMessage: RequestHandler = async (req, res) => {
     text,
     image: imageUrl,
   });
+
+  // Realtime push via Socket.IO if receiver is online
+  const receiverSocketId = getReceiverSocketId(receiverId);
+  if (receiverSocketId && ioInstance) {
+    ioInstance.to(receiverSocketId).emit("newMessage", newMessage);
+  }
 
   return res.status(201).json(newMessage);
 };

@@ -8,7 +8,7 @@ import arcjet from '@arcjet/node';
 const router = Router();
 const ROOT = process.cwd(); 
 
-// router.use(arcjet);
+router.use(arcjet);
 
 router.use('/auth', authRouter);
 router.use('/users', userRouter)

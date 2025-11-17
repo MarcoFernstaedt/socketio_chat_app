@@ -6,6 +6,12 @@ import { socketAuthMiddleware, AuthedSocket } from "../middleware/socket.auth.mi
 
 const userSocketMap = new Map<string, string>();
 
+export const getReceiverSocketId = (userId: string) => {
+  return userSocketMap.get(userId);
+};
+
+export let ioInstance: Server | null = null;
+
 export const initSocketServer = (httpServer: HTTPServer) => {
   const io = new Server(httpServer, {
     cors: {
@@ -13,6 +19,8 @@ export const initSocketServer = (httpServer: HTTPServer) => {
       credentials: true,
     },
   });
+
+  ioInstance = io;
 
   io.use(socketAuthMiddleware);
 
