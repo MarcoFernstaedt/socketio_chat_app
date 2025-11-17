@@ -19,7 +19,7 @@ export type ChatMessage = {
   receiverId: string;
   image?: string;
   text?: string;
-  createdAt: string; // backend usually returns ISO string
+  createdAt: string;
   isOptimistic?: boolean;
 };
 
@@ -45,6 +45,9 @@ type ChatStore = {
   getChatPartners: () => Promise<void>;
   getMessagesByUserId: (userId: string) => Promise<void>;
   sendMessage: (payload: NewMessagePayload) => Promise<void>;
+
+  subscribeToMessages: () => void;
+  unsubscribeFromMessages: () => void;
 };
 
 const getInitialSoundEnabled = (): boolean => {
@@ -173,5 +176,49 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       toast.error(message);
       console.error("Error sending message:", err);
     }
+  },
+
+  subscribeToMessages: () => {
+    const { selectedUser, isSoundEnabled } = get();
+    const { socket } = useAuthStore.getState();
+
+    if (!selectedUser) return;
+    if (!socket) return;
+
+    // avoid stacking multiple listeners
+    socket.off("newMessage");
+
+    socket.on("newMessage", (newMessage: ChatMessage) => {
+      const currentSelected = get().selectedUser;
+      // only append if this message belongs to the currently open chat
+      if (
+        !currentSelected ||
+        !(
+          newMessage.senderId === currentSelected._id ||
+          newMessage.receiverId === currentSelected._id
+        )
+      ) {
+        return;
+      }
+
+      set((state) => ({
+        messages: [...state.messages, newMessage],
+      }));
+
+      if (isSoundEnabled) {
+        const notificationSound = new Audio("/sounds/notification.mp3");
+
+        notificationSound.currentTime = 0;
+        notificationSound
+          .play()
+          .catch((err) => console.log("Audio play failed:", err));
+      }
+    });
+  },
+
+  unsubscribeFromMessages: () => {
+    const { socket } = useAuthStore.getState();
+    if (!socket) return;
+    socket.off("newMessage");
   },
 }));
