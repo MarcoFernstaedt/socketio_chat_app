@@ -1,29 +1,49 @@
+// src/app.ts
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { ENV } from "./lib/env";
 import path from "path";
+import { createServer } from "http";
+
+import { ENV } from "./lib/env";
 import router from "./routes";
 import connectDB from "./lib/db";
 import { errorHandler } from "./middleware/error";
+import { initSocketServer } from "./lib/socket";
 
 const app = express();
 const PORT = ENV.PORT || 3000;
 const ROOT = process.cwd(); // project root
 
-app.use(express.json({limit: '5mb'}));
+// Core middleware
+app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
-app.use(errorHandler);
-app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
+app.use(
+  cors({
+    origin: ENV.CLIENT_URL,
+    credentials: true,
+  })
+);
 
-// static (prod)
+// Static (prod)
 if (ENV.NODE_ENV === "production") {
   app.use(express.static(path.resolve(ROOT, "frontend/dist")));
 }
 
+// API routes
 app.use("/api", router);
 
+// Error handler (after routes)
+app.use(errorHandler);
+
+// Create HTTP server and attach Socket.IO
+const httpServer = createServer(app);
+initSocketServer(httpServer); // sets up io, middleware, connection handlers
+
+// Boot
 (async () => {
   await connectDB();
-  app.listen(PORT, () => console.log(`Server on port: ${PORT}`));
+  httpServer.listen(PORT, () => {
+    console.log(`HTTP + Socket.IO server running on port ${PORT}`);
+  });
 })();
