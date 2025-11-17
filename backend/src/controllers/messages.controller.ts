@@ -57,13 +57,16 @@ export const getAllChatPartners: RequestHandler = async (req, res) => {
     $or: [{ senderId: myId }, { receiverId: myId }],
   }).select("senderId receiverId");
 
+  const myIdStr = myId.toString();
   const partnerIds = new Set<string>();
+
   for (const m of messages) {
     const s = m.senderId.toString();
     const r = m.receiverId.toString();
-    if (s !== myId.toString()) partnerIds.add(s);
-    if (r !== myId.toString()) partnerIds.add(r);
+    if (s !== myIdStr) partnerIds.add(s);
+    if (r !== myIdStr) partnerIds.add(r);
   }
+
   if (partnerIds.size === 0) return res.status(200).json([]);
 
   const partners = await User.find({ _id: { $in: [...partnerIds] } })
@@ -75,25 +78,30 @@ export const getAllChatPartners: RequestHandler = async (req, res) => {
 
 /**
  * POST /message/send/:id
- * Body: { message?: string; image?: string; receiverId: string }
+ * Body: { text?: string; image?: string }
+ * :id is the receiver's user id
  */
 export const sendMessage: RequestHandler = async (req, res) => {
   if (!req.auth) throw new AppError("Unauthorized", 401);
 
-  const { message, image, receiverId } = req.body as {
-    message?: string;
+  const { text, image } = req.body as {
+    text?: string;
     image?: string;
-    receiverId: string;
   };
 
-  if (!receiverId || !isValidObjectId(receiverId))
+  const { id: receiverId } = req.params;
+
+  if (!receiverId || !isValidObjectId(receiverId)) {
     throw new AppError("Invalid receiverId", 400);
+  }
 
-  if (!message && !image)
+  if (!text && !image) {
     throw new AppError("Message or image is required", 400);
+  }
 
-  if (req.auth.userId === receiverId)
+  if (req.auth.userId === receiverId) {
     throw new AppError("Cannot send messages to yourself", 400);
+  }
 
   let imageUrl: string | undefined;
   if (image) {
@@ -101,10 +109,13 @@ export const sendMessage: RequestHandler = async (req, res) => {
     imageUrl = upload.secure_url;
   }
 
+  const senderId = new Types.ObjectId(req.auth.userId);
+  const receiverObjectId = new Types.ObjectId(receiverId);
+
   const newMessage = await Message.create({
-    senderId: new Types.ObjectId(req.auth.userId),
-    receiverId: new Types.ObjectId(receiverId),
-    text: message,
+    senderId,
+    receiverId: receiverObjectId,
+    text,
     image: imageUrl,
   });
 
