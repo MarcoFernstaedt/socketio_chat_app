@@ -13,6 +13,8 @@ const ChatContainer: React.FC = () => {
         selectedUser,
         getMessagesByUserId,
         messages,
+        subscribeToMessages,
+        unsubscribeFromMessages,
     } = useChatStore();
 
     const messageEndRef = useRef<HTMLDivElement | null>(null);
@@ -21,7 +23,13 @@ const ChatContainer: React.FC = () => {
     useEffect(() => {
         if (!selectedUser) return;
         void getMessagesByUserId(selectedUser._id);
-    }, [getMessagesByUserId, selectedUser]);
+
+        subscribeToMessages()
+
+        return () => {
+            unsubscribeFromMessages()
+        }
+    }, [getMessagesByUserId, selectedUser, subscribeToMessages, unsubscribeFromMessages]);
 
     // Auto-scroll to bottom when messages update
     useEffect(() => {
