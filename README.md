@@ -1,159 +1,242 @@
-# socketio_chat_app# Chatify Backend
+# Real-Time Chat Application (React + Node + Socket.IO)
 
-Chatify is a modern, secure, and scalable backend service for real-time messaging.  
-It provides authentication, authorization, bot protection, rate limiting, and email onboarding — all built with enterprise-grade TypeScript and Express best practices.
-
----
-
-## Overview
-
-Chatify powers a full-stack chat application that enables users to sign up, log in, and exchange messages.  
-It features a robust authentication flow, secure cookie-based JWT handling, and intelligent middleware protection (Arcjet) for rate limiting and bot detection.  
-
-The service is structured with modular controllers, models, and middleware for maintainability and scalability.
+A production-grade real-time one-to-one messaging application built with a modern full-stack architecture, featuring secure authentication, optimistic UI rendering, online presence indicators, and scalable backend design. This project demonstrates how a professional chat platform is built using best practices across both frontend and backend.
 
 ---
 
-## Core Features
+## Features
 
-- **User Authentication & Authorization**  
-  Secure signup/login flow with JWT cookies, password hashing via `bcryptjs`, and protected routes using middleware.
+### Authentication & Security
+- Full authentication flow powered by **Arcjet**, including bot protection and rate limiting
+- JWT-based auth stored in **HTTP-only cookies**
+- Password hashing using **bcryptjs**
+- Secure serialization via `toSafeUser` to ensure sensitive data never leaks
+- Robust global error handling with custom `AppError`
+- Protected REST routes + protected WebSocket connections
 
-- **Email Onboarding**  
-  New users receive a custom HTML welcome email via [Resend](https://resend.com).
+### Real-Time Messaging
+- Instant 1:1 messaging using **Socket.IO**
+- Server broadcasts online users in real time
+- Optimistic messaging: messages appear immediately and update when confirmed by the server
+- Graceful handling of connect/disconnect events
+- Avatar-based online/offline presence indicators
 
-- **Intelligent Protection**  
-  Integrated [Arcjet](https://arcjet.com) middleware for:
-  - Rate limiting (sliding window)
-  - Bot and spoof detection
-  - Live security enforcement
+### Image Messaging
+- Upload images through chat using Cloudinary
+- Real-time image delivery
+- Image preview directly in the chat bubble
 
-- **Protected API Routes**
-  - `/auth/me` – verify authenticated user  
-  - `/auth/sign-up` & `/auth/sign-in` – secure user creation and login  
-  - `/users` – retrieve all users (excluding current user)  
-  - `/messages` – send messages, view all chats, and fetch conversation history
+### User Management
+- Contacts tab showing all users
+- Chats tab showing only active conversation partners
+- Live online status across the entire app
 
-- **Cloudinary Integration**  
-  Upload and serve profile pictures and message images seamlessly.
+### UX Enhancements
+- Toggleable notification sounds
+- LocalStorage persistence for user preferences
+- Smooth auto-scroll to bottom of new messages
 
-- **Messaging System**  
-  Send and retrieve messages between users with strong data consistency in MongoDB.
+### Tech Stack
 
-- **Type-Safe Architecture**  
-  - Full TypeScript coverage  
-  - Typed Express Request extensions for `req.user`  
-  - Reusable `ReqWithUser` type  
-  - Centralized type declarations
+**Frontend**
+- React + TypeScript + Vite  
+- Zustand for state management  
+- Axios for HTTP communication  
+- Socket.IO Client  
+- TailwindCSS + DaisyUI for UI  
+- Lucide icons  
 
----
-
-## Technology Stack
-
-| Category | Tools & Libraries |
-|-----------|------------------|
-| **Language** | TypeScript |
-| **Framework** | Express.js |
-| **Database** | MongoDB + Mongoose |
-| **Auth** | JWT (cookie-based) + bcryptjs |
-| **Security** | Arcjet (rate limiting & bot defense) |
-| **Email Service** | Resend |
-| **Cloud Storage** | Cloudinary |
-| **Environment Management** | dotenv |
-| **Runtime** | Node.js (ES2020 target) |
-
----
-
-## Middleware Overview
-
-- **`authorizationMiddleware`**  
-  Validates JWT tokens from cookies, fetches authenticated users, and attaches user data to `req.user`.
-
-- **`arcjetProtection`**  
-  Shields all incoming requests with real-time rate limits and detects automated or spoofed bot requests.
-
-- **Error Handling**  
-  All controllers implement structured try/catch logic with consistent HTTP responses.
+**Backend**
+- Node.js + Express  
+- MongoDB + Mongoose  
+- Socket.IO Server  
+- Cloudinary for file uploads  
+- Arcjet security  
+- JWT-based authentication  
+- Modular architecture with routes, controllers, middleware, and serializers  
 
 ---
 
-## Project Structure
+## Folder Structure
 
-src/
-├── controllers/
-│   ├── auth.controller.ts
-│   ├── message.controller.ts
-│   └── user.controller.ts
-├── middleware/
-│   ├── auth.middleware.ts
-│   ├── arcjet.middleware.ts
-│   └── error.middleware.ts
-├── models/
-│   ├── User.ts
-│   └── Message.ts
-├── lib/
-│   ├── db.ts
-│   ├── cloudinary.ts
-│   ├── resend.ts
-│   ├── arcjet.ts
-│   └── env.ts
-├── types/
-│   └── request.ts
-└── routes/
-├── auth.route.ts
-├── users.route.ts
-└── message.route.ts
+project/
+├── backend/
+│   ├── src/
+│   │   ├── controllers/
+│   │   │   ├── auth.controller.ts
+│   │   │   └── messages.controller.ts
+│   │   ├── middleware/
+│   │   │   ├── auth.middleware.
+│   │   │   ├── arcjet.middleware.ts
+│   │   │   ├── error.ts
+│   │   │   └── socket.auth.middleware.ts
+│   │   ├── models/
+│   │   │   ├── User.ts
+│   │   │   └── Message.ts
+│   │   ├── lib/
+│   │   │   ├── AppError.ts
+│   │   │   ├── asyncHandler.ts
+│   │   │   ├── arcjet.ts
+│   │   │   ├── resend.ts
+│   │   │   ├── utils.ts
+│   │   │   ├── db.ts
+│   │   │   ├── socket.ts
+│   │   │   ├── cloudinary.ts
+│   │   │   ├── env.ts
+│   │   │   └── serializers/
+│   │   │       └── user.ts
+│   │   ├── routes/
+│   │   |   ├── auth.routes.ts
+│   │   |   ├── users.routes.ts
+│   │   |   └── messages.routes.ts
+│   |   └── app.ts
+│   ├── .env
+│
+└── frontend/
+├── src/
+│   ├── store/
+│   │   ├── useAuthStore.ts
+│   │   └── useChatStore.ts
+│   ├── components/
+│   │   ├── ChatContainer.tsx
+│   │   ├── ChatHeader.tsx
+│   │   ├── ChatList.tsx
+│   │   ├── ContactsList.tsx
+│   │   ├── MessageInput.tsx
+│   │   ├── NoConversationHistoryPlaceholder.tsx
+│   │   ├── MessageLoadingSkeleton.tsx
+│   │   ├── NoChatFound.tsx
+│   │   ├── PageLoader.tsx
+│   │   ├── ProfileHeader.tsx
+│   │   ├── UsersLoadingSkeleton.tsx
+│   │   └── NoChatHistoryPlaceholder.tsx
+│   ├── pages/
+│   │   ├── ChatsPage.tsx
+│   │   ├── LoginPage.tsx
+│   │   ├── SignUpPage.tsx
+│   ├── hooks/
+│   │   ├── useKyeboardSound.tsx
+│   │   ├── useForm.tsx
+│   ├── lib/
+│   │   ├── axios.tsx
+│   │   ├── error.tsx
+│   ├── App.tsx
+│   └── index.css
+├── index.html
+├── vite.config.ts
+└── .env
 
 ---
 
-## Setup & Installation
+## Backend Setup
 
-### 1. Clone the Repository
+### Install Dependencies
 ```bash
-git clone git@github.com:MarcoFernstaedt/socketio_chat_app.git
-cd socketio_chat_app/backend
-
-### 2. Install Dependencies
-```bash
+cd backend
 npm install
 
-### 3. Environment Variables
-#### Create a .env file in the root directory:
+Environment Variables
+
+Create backend/.env:
 
 PORT=3000
-MONGO_URI=your_mongodb_uri
+NODE_ENV=development || production
+MONGO_URI=your_mongodb_connection
 JWT_SECRET=your_jwt_secret
-RESEND_API_KEY=your_resend_api_key
-EMAIL_FROM=no-reply@chatify.com
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-ARCJET_API_KEY=your_arcjet_key
-CLIENT_URL=http://localhost:5173
-NODE_ENV=development
 
-### 4. Run Development Server
+RESEND_API_KEY=yourapikey
+EMAIL_FROM=sender
+EMAIL_FROM_NAME=sendername
 
-```bash
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+ARCJET_API_KEY=
+ARCJET_ENV=http://localhost:5173
+
+CLIENT_URL=http://localhost:3000/
+
+Start Backend
+
 npm run dev
 
 
----
+⸻
 
-## Future Enhancements
+🎨 Frontend Setup
 
-- Implement real-time messaging using Socket.io  
-- Add online status and typing indicators  
-- Integrate push notifications for new messages  
-- Display message read receipts  
-- Create an administrative dashboard for analytics and moderation  
-- Improve caching and query optimization for large-scale user bases  
-- Add unit and integration tests for controllers and middleware  
+Install Dependencies
 
----
+cd frontend
+npm install
 
-## Author
+Environment Variables
 
-**Marco Fernstaedt**  
-Lead Engineer
-Focused on building secure, scalable and optimized technology systems.
+Create frontend/.env:
+
+VITE_API_URL=http://localhost:3000
+
+Start Frontend
+
+npm run dev
+
+
+⸻
+
+## Real-Time Events
+
+Incoming Events (Client Receives)
+
+Event	Description
+newMessage	Pushes a new real-time message
+getOnlineUsers	Array of all currently online user IDs
+
+Outgoing Events (Client Emits)
+
+Event	Description
+connect	Establish authenticated socket
+disconnect	Cleanup and broadcast disconnect
+
+
+⸻
+
+## Architecture Summary
+	•	Fully typed (TypeScript everywhere)
+	•	Zustand controls:
+	•	Auth lifecycle
+	•	Chat messages
+	•	Online users
+	•	Socket subscriptions
+	•	SafeUser serializer ensures only whitelisted fields are returned
+	•	Real-time chat powered by fully authenticated Socket.IO server
+	•	Messages stored in MongoDB with senderId/receiverId indexing
+	•	Image uploads handled via Cloudinary
+	•	Middlewares ensure strict security:
+	•	Auth middleware
+	•	Arcjet middleware
+	•	Socket.IO auth middleware
+
+⸻
+
+## Future Roadmap
+	•	End-to-end encryption for messages
+	•	Read receipts
+	•	Push notifications (desktop + mobile)
+	•	Group chats
+	•	User profile customization
+	•	Message deletion/editing
+
+⸻
+
+## Status
+
+This project demonstrates a fully production-ready real-time messaging system using modern full-stack principles. It is suitable for portfolio use, showcasing advanced knowledge of:
+	•	Authentication and security
+	•	Real-time WebSocket engineering
+	•	Scalable backend architecture
+	•	Optimistic UI patterns
+	•	Full TypeScript frontend + backend
+
+Perfect for interviews, portfolios, and demonstrating real-world engineering skills.
+
