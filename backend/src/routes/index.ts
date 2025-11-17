@@ -3,12 +3,12 @@ import path from 'path';
 import authRouter from './auth.route';
 import messageRouter from './messages.route';
 import userRouter from './user.route';
-import arcjet from '@arcjet/node';
+import arcjetProtection from '../middleware/arcjet.middleware';
 
 const router = Router();
 const ROOT = process.cwd(); 
 
-router.use(arcjet);
+router.use(arcjetProtection);
 
 router.use('/auth', authRouter);
 router.use('/users', userRouter)
