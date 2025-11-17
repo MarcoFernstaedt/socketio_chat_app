@@ -3,7 +3,6 @@ import { io, type Socket } from "socket.io-client";
 import toast from "react-hot-toast";
 import { axiosInstance } from "../lib/axios";
 import { getErrorMessage } from "../lib/error";
-import { clear } from "console";
 
 const BASE_URL =
     import.meta.env.MODE === "development"
