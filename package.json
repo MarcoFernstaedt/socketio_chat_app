@@ -1,5 +1,6 @@
 {
   "name": "socketio_chat_app",
+  "type": "module",
   "version": "1.0.0",
   "description": "A production-grade real-time one-to-one messaging application built with a modern full-stack architecture, featuring secure authentication, optimistic UI rendering, online presence indicators, and scalable backend design. This project demonstrates how a professional chat platform is built using best practices across both frontend and backend.",
   "main": "index.js",
