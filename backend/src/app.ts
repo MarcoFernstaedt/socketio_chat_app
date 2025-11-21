@@ -13,6 +13,7 @@ import { errorHandler } from "./middleware/error.js";
 import { initSocketServer } from "./lib/socket.js";
 
 const app = express();
+app.set("trust proxy", 1);
 const PORT = process.env.PORT || 8080;
 const ROOT = process.cwd();
 
