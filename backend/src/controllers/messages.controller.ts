@@ -2,7 +2,7 @@ import { RequestHandler } from "express";
 import { Types, isValidObjectId } from "mongoose";
 import User from "../models/User.js";
 import Message from "../models/message.js";
-import cloudinary from "../lib/cloudinary";
+import cloudinary from "../lib/cloudinary.js";
 import { AppError } from "../lib/AppError.js";
 import { getReceiverSocketId, ioInstance } from "../lib/socket.js";
 
