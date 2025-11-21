@@ -2,11 +2,11 @@ import { Router, Request, Response } from 'express';
 import authRouter from './auth.route.js';
 import messageRouter from './messages.route.js';
 import userRouter from './user.route.js';
-// import arcjetProtection from '../middleware/arcjet.middleware.js';
+import arcjetProtection from '../middleware/arcjet.middleware.js';
 
 const router = Router();
 
-// router.use(arcjetProtection);
+router.use(arcjetProtection);
 
 router.use('/auth', authRouter);
 router.use('/users', userRouter);
