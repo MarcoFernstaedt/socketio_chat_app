@@ -1,5 +1,5 @@
 // src/app.ts
-import express from "express";
+import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
@@ -25,20 +25,29 @@ app.use(
   })
 );
 
-// Static (prod)
+// -------------------------------
+// PRODUCTION STATIC SERVE
+// -------------------------------
 if (ENV.NODE_ENV === "production") {
-  app.use(express.static(path.resolve(ROOT, "frontend/dist")));
+  const clientDist = path.resolve(ROOT, "client/dist");
+
+  app.use(express.static(clientDist));
+
+  app.get("*", (req: Request, res: Response) => {
+    if (req.path.startsWith("/api")) return;
+    res.sendFile(path.join(clientDist, "index.html"));
+  });
 }
 
 // API routes
 app.use("/api", router);
 
-// Error handler (after routes)
+// Error handler
 app.use(errorHandler);
 
-// Create HTTP server and attach Socket.IO
+// Create HTTP server + Socket.IO
 const httpServer = createServer(app);
-initSocketServer(httpServer); // sets up io, middleware, connection handlers
+initSocketServer(httpServer);
 
 // Boot
 (async () => {

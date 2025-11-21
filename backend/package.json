@@ -145,7 +145,8 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts"
+    "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
+    "start": "node src/app.ts"
   },
   "keywords": [],
   "author": "",
