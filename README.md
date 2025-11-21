@@ -239,4 +239,3 @@ This project demonstrates a fully production-ready real-time messaging system us
 	•	Full TypeScript frontend + backend
 
 Perfect for interviews, portfolios, and demonstrating real-world engineering skills.
-
