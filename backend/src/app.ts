@@ -5,8 +5,10 @@ import cors from "cors";
 import path from "path";
 import { createServer } from "http";
 
-import { ENV } from "./lib/env.js";
 import "dotenv/config";
+console.log("BOOT: env loaded, PORT=", process.env.PORT);
+import { ENV } from "./lib/env.js";
+console.log("BOOT: ENV ok");
 import router from "./routes/index.js";
 import connectDB from "./lib/db.js";
 import { errorHandler } from "./middleware/error.js";
@@ -23,7 +25,7 @@ app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ENV.NODE_ENV === "production" ? true : ENV.CLIENT_URL,
+    origin: ENV.CLIENT_URL,
     credentials: true,
   })
 );
