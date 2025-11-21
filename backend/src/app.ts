@@ -59,7 +59,7 @@ initSocketServer(httpServer);
 // Boot
 (async () => {
   await connectDB();
-  httpServer.listen(PORT, () => {
+  httpServer.listen(PORT as number, "0.0.0.0", () => {
     console.log(`HTTP + Socket.IO server running on port ${PORT}`);
   });
 })();
