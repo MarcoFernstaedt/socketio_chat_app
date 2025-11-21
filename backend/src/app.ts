@@ -4,8 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
 import { createServer } from "http";
-
-import "dotenv/config";
+import 'dotenv/config';
 console.log("BOOT: env loaded, PORT=", process.env.PORT);
 import { ENV } from "./lib/env.js";
 console.log("BOOT: ENV ok");
