@@ -14,7 +14,7 @@ import { initSocketServer } from "./lib/socket";
 
 const app = express();
 const PORT = ENV.PORT || 3000;
-const ROOT = process.cwd(); // project root
+const ROOT =path.resolve();
 
 // Core middleware
 app.use(express.json({ limit: "5mb" }));
@@ -30,7 +30,7 @@ app.use(
 // PRODUCTION STATIC SERVE
 // -------------------------------
 if (ENV.NODE_ENV === "production") {
-  const clientDist = path.resolve(ROOT, "client/dist");
+  const clientDist = path.resolve(ROOT, "frontend/dist");
 
   app.use(express.static(clientDist));
 
