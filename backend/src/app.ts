@@ -1,19 +1,19 @@
 import express from "express";
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
 import { createServer } from "http";
 
 import { ENV } from "./lib/env.js";
-import 'dotenv/config';
+import "dotenv/config";
 import router from "./routes/index.js";
 import connectDB from "./lib/db.js";
 import { errorHandler } from "./middleware/error.js";
 import { initSocketServer } from "./lib/socket.js";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 const ROOT = process.cwd();
 
 // Core middleware
@@ -26,6 +26,14 @@ app.use(
   })
 );
 
+// Health check for Sevalla (and liveness probe)
+app.get("/health", (_req: Request, res: Response) => {
+  res.status(200).send("ok");
+});
+
+// API routes (MUST be before catch-all)
+app.use("/api", router);
+
 // -------------------------------
 // PRODUCTION STATIC SERVE
 // -------------------------------
@@ -34,19 +42,12 @@ if (ENV.NODE_ENV === "production") {
 
   app.use(express.static(clientDist));
 
-  app.get("*", (req: Request, res: Response) => {
-    if (req.path.startsWith("/api")) return;
+  // IMPORTANT: pass /api requests through instead of hanging
+  app.get("*", (req: Request, res: Response, next: NextFunction) => {
+    if (req.path.startsWith("/api")) return next();
     res.sendFile(path.join(clientDist, "index.html"));
   });
 }
-
-// Heath check for Sevalle
-app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).send('ok')
-})
-
-// API routes
-app.use("/api", router);
 
 // Error handler
 app.use(errorHandler);
