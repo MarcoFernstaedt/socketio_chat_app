@@ -6,7 +6,6 @@ import {
   isAuthorizedUser,
 } from "../controllers/auth.controller.js";
 import authorizationMiddleware from "../middleware/auth.middleware.js";
-import arcjet from "@arcjet/node";
 import { asyncHandler } from "../lib/asyncHandler.js";
 
 const authRouter = Router();

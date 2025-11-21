@@ -4,12 +4,13 @@ import cors from "cors";
 import path from "path";
 import { createServer } from "http";
 import { ENV } from "./lib/env.js";
+import 'dotenv/config';
 import router from "./routes/index.js";
 import connectDB from "./lib/db.js";
 import { errorHandler } from "./middleware/error.js";
 import { initSocketServer } from "./lib/socket.js";
 const app = express();
-const PORT = ENV.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 const ROOT = process.cwd();
 // Core middleware
 app.use(express.json({ limit: "5mb" }));
@@ -27,9 +28,15 @@ if (ENV.NODE_ENV === "production") {
     app.get("*", (req, res) => {
         if (req.path.startsWith("/api"))
             return;
+        if (req.path.startsWith("/"))
+            return;
         res.sendFile(path.join(clientDist, "index.html"));
     });
 }
+// Heath check for Sevalle
+app.get('/', (_req, res) => {
+    res.status(200).send('ok');
+});
 // API routes
 app.use("/api", router);
 // Error handler

@@ -36,13 +36,12 @@ if (ENV.NODE_ENV === "production") {
 
   app.get("*", (req: Request, res: Response) => {
     if (req.path.startsWith("/api")) return;
-    if (req.path.startsWith("/")) return;
     res.sendFile(path.join(clientDist, "index.html"));
   });
 }
 
 // Heath check for Sevalle
-app.get('/', (_req: Request, res: Response) => {
+app.get('/health', (_req: Request, res: Response) => {
   res.status(200).send('ok')
 })
 
