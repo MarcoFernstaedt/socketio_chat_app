@@ -39,6 +39,11 @@ if (ENV.NODE_ENV === "production") {
   });
 }
 
+// Heath check for Sevalle
+app.use('/health', (req: Request, res: Response) => {
+  res.status(200).send('ok')
+})
+
 // API routes
 app.use("/api", router);
 
