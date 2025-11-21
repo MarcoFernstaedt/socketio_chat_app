@@ -1,8 +1,9 @@
 {
   "name": "backend",
+  "type": "module",
   "version": "1.0.0",
   "description": "",
-  "main": "src/app.ts",
+  "main": "src/app.tsx",
   "dependencies": {
     "@arcjet/inspect": "^1.0.0-beta.10",
     "@arcjet/node": "^1.0.0-beta.10",
