@@ -27,14 +27,6 @@ app.use(
   })
 );
 
-// Logs
-app.use((req, _res, next) => {
-  if (req.path.startsWith("/api")) {
-    console.log("API IN:", req.method, req.path);
-  }
-  next();
-});
-
 // API routes (MUST be before catch-all)
 app.use("/api", router);
 
