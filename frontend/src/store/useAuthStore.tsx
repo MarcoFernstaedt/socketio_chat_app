@@ -52,7 +52,7 @@ type AuthStore = {
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
     authUser: null,
-    isCheckingAuth: false,
+    isCheckingAuth: true,
     isSigningUp: false,
     isLoggingIn: false,
     socket: null,
@@ -61,7 +61,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     // Verify logged-in user on app load
     checkAuth: async () => {
         const { connectSocket } = get();
-        set({ isCheckingAuth: true })
         try {
             const res = await axiosInstance.get<AuthUser>("/auth/me");
             set({ authUser: res.data });
