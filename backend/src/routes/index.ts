@@ -14,9 +14,4 @@ router.use('/auth', authRouter);
 router.use('/users', userRouter)
 router.use('/messages', messageRouter);
 
-// keep LAST: SPA fallback
-router.get('*', (_req: Request, res: Response) => {
-  res.sendFile(path.resolve(ROOT, 'frontend/dist/index.html'));
-});
-
 export default router;
