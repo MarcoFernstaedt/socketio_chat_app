@@ -14,7 +14,8 @@ import { initSocketServer } from "./lib/socket.js";
 
 const app = express();
 app.set("trust proxy", 1);
-const PORT = process.env.PORT || 8080;
+
+const PORT = Number(process.env.PORT) || 8080;
 const ROOT = process.cwd();
 
 // Core middleware
@@ -22,12 +23,17 @@ app.use(express.json({ limit: "5mb" }));
 app.use(cookieParser());
 app.use(
   cors({
-    origin: ENV.CLIENT_URL,
+    origin: ENV.NODE_ENV === "production" ? true : ENV.CLIENT_URL,
     credentials: true,
   })
 );
 
-// API routes (MUST be before catch-all)
+// Health check for Sevalla probes
+app.get("/health", (_req: Request, res: Response) => {
+  return res.status(200).send("ok");
+});
+
+// API routes
 app.use("/api", router);
 
 // -------------------------------
@@ -38,10 +44,9 @@ if (ENV.NODE_ENV === "production") {
 
   app.use(express.static(clientDist));
 
-  // IMPORTANT: pass /api requests through instead of hanging
   app.get("*", (req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith("/api")) return next();
-    res.sendFile(path.join(clientDist, "index.html"));
+    return res.sendFile(path.join(clientDist, "index.html"));
   });
 }
 
@@ -55,7 +60,7 @@ initSocketServer(httpServer);
 // Boot
 (async () => {
   await connectDB();
-  httpServer.listen(PORT as number, "0.0.0.0", () => {
+  httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`HTTP + Socket.IO server running on port ${PORT}`);
   });
 })();
