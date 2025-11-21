@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import cloudinary from "../lib/cloudinary";
+import cloudinary from "../lib/cloudinary.js";
 import User from "../models/User.js";
 import { toSafeUser } from "../lib/serializers/user.js";
 import { AppError } from "../lib/AppError.js";
