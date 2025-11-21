@@ -6,11 +6,11 @@ import cors from "cors";
 import path from "path";
 import { createServer } from "http";
 
-import { ENV } from "./lib/env";
-import router from "./routes";
-import connectDB from "./lib/db";
-import { errorHandler } from "./middleware/error";
-import { initSocketServer } from "./lib/socket";
+import { ENV } from "./lib/env.js";
+import router from "./routes/index.js";
+import connectDB from "./lib/db.js";
+import { errorHandler } from "./middleware/error.js";
+import { initSocketServer } from "./lib/socket.js";
 
 const app = express();
 const PORT = ENV.PORT || 3000;

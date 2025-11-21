@@ -1,11 +1,11 @@
 import { RequestHandler } from "express";
 import bcrypt from "bcryptjs";
-import User from "../models/User";
-import { generateToken } from "../lib/utils";
-import { sendWelcomeEmail } from "../emails/emailHandlers";
-import { ENV } from "../lib/env";
-import { AppError } from "../lib/AppError";
-import { toSafeUser } from "../lib/serializers/user";
+import User from "../models/User.js";
+import { generateToken } from "../lib/utils.js";
+import { sendWelcomeEmail } from "../emails/emailHandlers.js";
+import { ENV } from "../lib/env.js";
+import { AppError } from "../lib/AppError.js";
+import { toSafeUser } from "../lib/serializers/user.js";
 
 /**
  * @desc Register a new user

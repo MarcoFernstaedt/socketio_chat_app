@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express'
-import { getAllChatPartners, getAllContacts, getMessagesWithUser, sendMessage } from '../controllers/messages.controller';
-import authorizationMiddleware from '../middleware/auth.middleware';
-import { asyncHandler } from '../lib/asyncHandler';
+import { getAllChatPartners, getAllContacts, getMessagesWithUser, sendMessage } from '../controllers/messages.controller.js';
+import authorizationMiddleware from '../middleware/auth.middleware.js';
+import { asyncHandler } from '../lib/asyncHandler.js';
 
 const messageRouter = Router();
 

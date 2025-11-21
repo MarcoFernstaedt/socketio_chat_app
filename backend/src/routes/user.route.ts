@@ -1,8 +1,7 @@
 import { Router } from "express";
-import { updateUserProfilePic } from "../controllers/users.controller";
-import authorizationMiddleware from "../middleware/auth.middleware";
-import { asyncHandler } from "../lib/asyncHandler";
-import arcjetProtection from "../middleware/arcjet.middleware";
+import { updateUserProfilePic } from "../controllers/users.controller.js";
+import authorizationMiddleware from "../middleware/auth.middleware.js";
+import { asyncHandler } from "../lib/asyncHandler.js";
 
 const userRouter = Router();
 

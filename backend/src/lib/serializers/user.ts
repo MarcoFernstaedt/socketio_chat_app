@@ -1,4 +1,4 @@
-import type { IUser } from "../../models/User";
+import type { IUser } from "../../models/User.js";
 
 export type SafeUser = {
   _id: string;

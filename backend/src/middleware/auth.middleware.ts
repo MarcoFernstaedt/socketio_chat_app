@@ -1,8 +1,7 @@
-// src/middleware/auth.ts
 import { RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import { ENV } from "../lib/env";
-import { TokenPayload, AuthContext } from "../types/auth";
+import { ENV } from "../lib/env.js";
+import { TokenPayload, AuthContext } from "../types/auth.js";
 
 const authorizationMiddleware: RequestHandler = (req, res, next) => {
   try {

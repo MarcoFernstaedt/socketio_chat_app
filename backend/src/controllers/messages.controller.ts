@@ -1,10 +1,10 @@
 import { RequestHandler } from "express";
 import { Types, isValidObjectId } from "mongoose";
-import User from "../models/User";
-import Message from "../models/message";
+import User from "../models/User.js";
+import Message from "../models/message.js";
 import cloudinary from "../lib/cloudinary";
-import { AppError } from "../lib/AppError";
-import { getReceiverSocketId, ioInstance } from "../lib/socket";
+import { AppError } from "../lib/AppError.js";
+import { getReceiverSocketId, ioInstance } from "../lib/socket.js";
 
 /**
  * GET /message/contacts

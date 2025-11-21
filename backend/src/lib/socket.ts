@@ -1,8 +1,7 @@
-// src/socket/index.ts
 import { Server } from "socket.io";
 import type { Server as HTTPServer } from "http";
-import { ENV } from "../lib/env";
-import { socketAuthMiddleware, AuthedSocket } from "../middleware/socket.auth.middleware";
+import { ENV } from "../lib/env.js";
+import { socketAuthMiddleware, AuthedSocket } from "../middleware/socket.auth.middleware.js";
 
 const userSocketMap = new Map<string, string>();
 

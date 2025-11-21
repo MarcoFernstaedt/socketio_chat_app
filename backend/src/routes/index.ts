@@ -1,9 +1,9 @@
 import { Router, Request, Response } from 'express';
 import path from 'path';
-import authRouter from './auth.route';
-import messageRouter from './messages.route';
-import userRouter from './user.route';
-import arcjetProtection from '../middleware/arcjet.middleware';
+import authRouter from './auth.route.js';
+import messageRouter from './messages.route.js';
+import userRouter from './user.route.js';
+import arcjetProtection from '../middleware/arcjet.middleware.js';
 
 const router = Router();
 const ROOT = process.cwd(); 

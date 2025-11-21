@@ -1,9 +1,8 @@
-// src/controllers/user.controller.ts
 import { RequestHandler } from "express";
 import cloudinary from "../lib/cloudinary";
-import User from "../models/User";
-import { toSafeUser } from "../lib/serializers/user";
-import { AppError } from "../lib/AppError";
+import User from "../models/User.js";
+import { toSafeUser } from "../lib/serializers/user.js";
+import { AppError } from "../lib/AppError.js";
 
 type UpdateBody = { profilePic: string };
 

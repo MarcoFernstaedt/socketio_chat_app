@@ -1,11 +1,10 @@
-// src/middleware/socket.auth.middleware.ts
 import { Socket } from "socket.io";
 import jwt from "jsonwebtoken";
-import User from "../models/User";
-import { ENV } from "../lib/env";
-import { TokenPayload } from "../types/auth";
-import { toSafeUser, SafeUser } from "../lib/serializers/user";
-import { AppError } from "../lib/AppError";
+import User from "../models/User.js";
+import { ENV } from "../lib/env.js";
+import { TokenPayload } from "../types/auth.js";
+import { toSafeUser, SafeUser } from "../lib/serializers/user.js";
+import { AppError } from "../lib/AppError.js";
 
 type NextFn = (err?: Error) => void;
 

@@ -1,5 +1,5 @@
 import type { ErrorRequestHandler } from "express";
-import { AppError } from "../lib/AppError";
+import { AppError } from "../lib/AppError.js";
 
 export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   const status = err instanceof AppError ? err.statusCode : 500;
