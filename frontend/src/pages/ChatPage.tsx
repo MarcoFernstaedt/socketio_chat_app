@@ -1,5 +1,4 @@
 import React from 'react'
-import { useAuthStore } from '../store/useAuthStore'
 import BorderAnimatedContainer from '../components/BorderAnimatedContainer';
 import { useChatStore } from '../store/useChatStore';
 import ProfileHeader from '../components/ProfileHeader';

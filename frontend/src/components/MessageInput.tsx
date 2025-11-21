@@ -16,7 +16,7 @@ const MessageInput: React.FC = () => {
 
     const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-    const { isSoundEnabled, sendMessage, isMessagesLoading } = useChatStore();
+    const { isSoundEnabled, sendMessage } = useChatStore();
 
     const handleSendMessage = (event: FormEvent) => {
         event.preventDefault();

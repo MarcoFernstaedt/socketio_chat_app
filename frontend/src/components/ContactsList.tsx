@@ -10,11 +10,7 @@ const ContactsList: React.FC = () => {
         allContacts,
         setSelectedUser,
         isUsersLoading,
-        selectedUser,
     } = useChatStore();
-    const isOnline = Boolean(
-        selectedUser && onlineUsers.includes(selectedUser._id)
-    );
 
     useEffect(() => {
         void getAllContacts();
