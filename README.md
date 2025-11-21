@@ -240,4 +240,4 @@ This project demonstrates a fully production-ready real-time messaging system us
 
 Perfect for interviews, portfolios, and demonstrating real-world engineering skills.
 
-https://chatify-0co30.sevalla.app/health
+chatify-yzqyj.sevalla.app/health

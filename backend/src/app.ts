@@ -31,7 +31,7 @@ app.use(
 
 // Health check for Sevalla probes
 app.get("/health", (_req: Request, res: Response) => {
-  return res.status(200).send("ok");
+  res.status(200).send("ok");
 });
 
 // API routes
@@ -60,8 +60,15 @@ initSocketServer(httpServer);
 
 // Boot
 (async () => {
+  // 1. Start listening IMMEDIATELY so Sevalla sees a healthy port
   httpServer.listen(PORT, "0.0.0.0", () => {
     console.log(`HTTP + Socket.IO server running on port ${PORT}`);
   });
-  await connectDB();
+
+  // 2. Connect to DB AFTER — this prevents Sevalla from killing your app
+  try {
+    await connectDB();
+  } catch (err) {
+    console.error("DB connection failed:", err);
+  }
 })();
