@@ -146,7 +146,8 @@
   },
   "scripts": {
     "dev": "nodemon --watch src --ext ts --exec ts-node src/app.ts",
-    "start": "node src/app.ts"
+    "build": "tsc",
+    "start": "node dist/app.js"
   },
   "keywords": [],
   "author": "",

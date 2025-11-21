@@ -14,7 +14,7 @@ import { initSocketServer } from "./lib/socket";
 
 const app = express();
 const PORT = ENV.PORT || 3000;
-const ROOT =path.resolve();
+const ROOT = process.cwd();
 
 // Core middleware
 app.use(express.json({ limit: "5mb" }));
