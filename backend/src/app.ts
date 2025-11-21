@@ -29,7 +29,7 @@ app.use(
 // PRODUCTION STATIC SERVE
 // -------------------------------
 if (ENV.NODE_ENV === "production") {
-  const clientDist = path.resolve(ROOT, "../frontend/dist");
+  const clientDist = path.resolve(ROOT, "../../frontend/dist");
 
   app.use(express.static(clientDist));
 
